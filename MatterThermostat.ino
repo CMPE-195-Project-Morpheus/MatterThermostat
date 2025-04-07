@@ -28,8 +28,8 @@
 MatterThermostat SimulatedThermostat;
 
 // WiFi is manually set and started
-const char *ssid = "ATT7r3Qjh3";          // Change this to your WiFi SSID
-const char *password = "9=ij5urs8cjb";  // Change this to your WiFi password
+const char *ssid = "";          // Change this to your WiFi SSID
+const char *password = "";  // Change this to your WiFi password
 
 // set your board USER BUTTON pin here - decommissioning button
 const uint8_t buttonPin = BOOT_PIN;  // Set your pin here. Using BOOT Button.
