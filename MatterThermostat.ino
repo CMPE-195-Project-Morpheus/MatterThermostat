@@ -47,8 +47,8 @@ float CtoF (float Celsius) {
 float getSimulatedTemperature(bool isHeating, bool isCooling) {
   // read sensor temperature and apply heating/cooling
   float simulatedTempHWSensor = SimulatedThermostat.getLocalTemperature();
-  Serial.printf("This is simulatedTempHWSensor in Celsius: %.01fC\r\n", SimulatedThermostat.getLocalTemperature());
-  Serial.printf("This is simulatedTempHWSensor in Fahrenheit: %.01fF\r\n", CtoF(SimulatedThermostat.getLocalTemperature()));
+  //Serial.printf("This is simulatedTempHWSensor in Celsius: %.01fC\r\n", SimulatedThermostat.getLocalTemperature());
+  Serial.printf("This is simulatedTempHWSensor in Fahrenheit: %.01fF\r\n", SimulatedThermostat.getLocalTemperature());
 
   if (isHeating) {
     // it will increase to simulate a heating system
