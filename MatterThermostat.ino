@@ -23,12 +23,11 @@
 #include <Matter.h>
 #include <WiFi.h>
 
-// DHT Temperature-Humidity Sensor Manager File
+// DHT Managers
 #include <DHT.h>
 #define DHTPIN 4
 #define DHTTYPE DHT11
-DHT dht (DHTPIN, DHTTYPE);
-
+DHT dht(DHTPIN, DHTTYPE);
 
 // List of Matter Endpoints for this Node
 // Matter Thermostat Endpoint
@@ -50,40 +49,40 @@ float CtoF (float Celsius) {
   return ((Celsius * 9.0 / 5.0) + 32.0);
 }
 
-float dht11TempRead () {
-  // Incorporate a 10 second delay
-  delay(10000);
-  float tempF = dht.readTemperature(true);
+float FtoC (float F) {
+  return ((F - 32.0) * (5.0 / 9.0));
+}
 
+float dhtTempRead() {
+  delay(11000);
+  float tempF = dht.readTemperature(true);
   if (isnan(tempF)) {
-    Serial.println(F("Fail to read from sensor"));
+    dhtTempRead();
   }
   return tempF;
 }
 
 // Simulate a system that will activate heating/cooling in addition to a temperature sensor - add your preferred code here
 float getSimulatedTemperature(bool isHeating, bool isCooling) {
-  // delay for the DHT11 Sensor
-  delay(10000);
-  float dhtTemp = dht11TempRead();
   // read sensor temperature and apply heating/cooling
   //float simulatedTempHWSensor = SimulatedThermostat.getLocalTemperature();
   //Serial.printf("This is simulatedTempHWSensor in Celsius: %.01fC\r\n", SimulatedThermostat.getLocalTemperature());
-  //Serial.printf("This is simulatedTempHWSensor in Fahrenheit: %.01fF\r\n", CtoF(SimulatedThermostat.getLocalTemperature()));
-
+  float tempSensor = dhtTempRead();
+  //Serial.printf("This is simulatedTempHWSensor in Fahrenheit: %.01fF\r\n", SimulatedThermostat.getLocalTemperature());
+  Serial.printf("This is tempSensorDHT: %0.1fF \r\n", tempSensor);
   if (isHeating) {
     // it will increase to simulate a heating system
     //simulatedTempHWSensor = simulatedTempHWSensor + 0.5;
-    dhtTemp = dhtTemp + 0.5;
+    tempSensor = tempSensor + 0.5;
   }
   if (isCooling) {
     // it will decrease to simulate a colling system
     //simulatedTempHWSensor = simulatedTempHWSensor - 0.5;
-    dhtTemp = dhtTemp - 0.5;
+    tempSensor = tempSensor - 0.5;
   }
   // otherwise, it will keep the temperature stable
   //return simulatedTempHWSensor;
-  return dhtTemp;
+  return tempSensor;
 }
 
 void setup() {
@@ -132,7 +131,10 @@ void setup() {
     // cooling setpoint must be lower than heating setpoint by at least 2.5C or 36.5F (deadband), in auto mode
     SimulatedThermostat.setCoolingHeatingSetpoints(CtoF(20.0), CtoF(23.00));  // the target cooler and heating setpoint
     // set the local temperature sensor in Fahrenheit (12.5C -> 54.5)
-    SimulatedThermostat.setLocalTemperature(CtoF(12.50));
+    //SimulatedThermostat.setLocalTemperature(CtoF(12.50));
+    Serial.printf("This is the local set temperature without FtoC: %0.1fF \r\n", dhtTempRead());
+    Serial.printf("This is the local set temperature with FtoC: %0.1fC \r\n", FtoC(dhtTempRead()));
+    SimulatedThermostat.setLocalTemperature(FtoC(dhtTempRead()));
 
     Serial.println();
     Serial.printf(
@@ -146,12 +148,8 @@ void setup() {
     );
 
     Serial.printf("Auto mode is ON. Initial Temperature of %.01fC \r\n", SimulatedThermostat.getLocalTemperature());
-    Serial.printf("Auto mode is ON. Initial Temperature of %.01fF \r\n", CtoF(SimulatedThermostat.getLocalTemperature()));
+    Serial.printf("Auto mode is ON. Initial Temperature of %.01fF \r\n", SimulatedThermostat.getLocalTemperature());
     Serial.println("Local Temperature Sensor will be simulated every 10 seconds and changed by a simulated heater and cooler to move in between setpoints.");
-
-    // DHT11 TESTING
-    Serial.println(F("DHT11 Test"));
-
   }
 }
 
@@ -172,9 +170,9 @@ void readSerialForNewTemperature() {
         if (newTemperatureF >= -58.0 && newTemperatureF <= 122.0) {
           // set the new temperature
           float newTempC = ((newTemperatureF - 32.0) * (5.0 / 9.0));
-          Serial.printf("This is newTempC from Serial Monitor: %0.1fC \r\n", newTempC);
+          Serial.printf("This is newTempC: %0.1fC \r\n", newTempC);
           SimulatedThermostat.setLocalTemperature(newTempC);
-          Serial.printf("New Temperature from Serial Monitor is %.01fF (%.01fC) \r\n", newTemperatureF, newTempC);
+          Serial.printf("New Temperature is %.01fF (%.01fC) \r\n", newTemperatureF, newTempC);
         } else {
           Serial.println("Invalid Temperature value. Please type a number between -58F (-50C) and 122F (50C)");
         }
@@ -203,14 +201,14 @@ void loop() {
   static bool isCooling = false;
 
   // check if a new temperature is typed in the Serial Monitor
-  //readSerialForNewTemperature();
+  readSerialForNewTemperature();
 
   // simulate thermostat with heating/cooling system and the associated local temperature change, every 10s
   if (!(timeCounter++ % 20)) {  // delaying for 500ms x 20 = 10s
     float localTemperature = getSimulatedTemperature(isHeating, isCooling);
     // Print the current thermostat local temperature value
-    Serial.printf("Current Local Temperature is %0.1fF (%.01fC) \r\n", CtoF(localTemperature), localTemperature);
-    SimulatedThermostat.setLocalTemperature(localTemperature);  // publish the new temperature value
+    Serial.printf("Current Local Temperature (from getSimTemp) is %0.1f \r\n", localTemperature);
+    SimulatedThermostat.setLocalTemperature(FtoC(localTemperature));  // publish the new temperature value
 
     // Simulate the thermostat control system - User has 4 modes: OFF, HEAT, COOL, AUTO
     switch (SimulatedThermostat.getMode()) {
