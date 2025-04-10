@@ -23,7 +23,8 @@ Tools > Boards > Board Manager and then search for the esp32 package by Espressi
 This gives you the ability to use ESP32 variant boards within the IDE. For using the DHT11 Sensor, additional libraries are required. This can be amended by navigating to 
 Sketch > Include Library > Manage Library and searching for "DHT sensor library" by Adafruit as well installing the dependency "Adafruit Unified Sensor" also by Adafruit. 
 
-![DHT11 Sensor Library in Library Manager](https://github.com/user-attachments/assets/c50f9e8b-0daf-43d0-b248-5c3e475d11ff)![Install All Dependencies](https://github.com/user-attachments/assets/2ba62dc7-79bf-4b77-a31f-a0de1d180b16)![Installation Complete](https://github.com/user-attachments/assets/d6c5c6c3-4a17-49ff-8257-1c047905d171)
+![DHT11 Sensor Library in Library Manager](https://github.com/user-attachments/assets/c50f9e8b-0daf-43d0-b248-5c3e475d11ff)![Install All Dependencies](https://github.com/user-attachments/assets/2ba62dc7-79bf-4b77-a31f-a0de1d180b16)
+![Installation Complete](https://github.com/user-attachments/assets/d6c5c6c3-4a17-49ff-8257-1c047905d171)
 
 Both of these libraries are necessary for the use of the DHT sensor within the code base. 
 
