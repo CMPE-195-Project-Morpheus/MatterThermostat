@@ -15,7 +15,8 @@ The Arduino IDE supports development of Espressif's ESP32 and all ESP32 variant 
 
 In the Tools tab, navigate to 
 Tools > Boards > Board Manager and then search for the esp32 package by Espressif 
-![Board Manager Finder in Tools](https://github.com/user-attachments/assets/eebbe71d-acea-4220-925e-33e30e9b9308)![esp32 by espressif systems in Board Manager](https://github.com/user-attachments/assets/87579891-ec9b-434d-a872-9ec4266c34a5)
+![Board Manager Finder in Tools](https://github.com/user-attachments/assets/eebbe71d-acea-4220-925e-33e30e9b9308)
+![esp32 by espressif systems in Board Manager](https://github.com/user-attachments/assets/87579891-ec9b-434d-a872-9ec4266c34a5)
 
 
 
