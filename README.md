@@ -1,6 +1,6 @@
 # MatterThermostat
 
-This code base is based upon the Espressif Arduino IDE Matter example code for a simulated thermostat (https://github.com/SiliconLabs/arduino/blob/main/libraries/Matter/examples/matter_thermostat/matter_thermostat.ino). This code base was modified to display and perform temperature arithmetic using Fahrenheit instead of Celsius. Another addition was the introduction of the use of the DHT11 Temperature and Humidity sensor for the initial setting of the thermostat. 
+This code base is based upon the Espressif Arduino IDE Matter example code for a simulated thermostat (https://github.com/espressif/arduino-esp32/blob/master/libraries/Matter/examples/MatterThermostat/MatterThermostat.ino). This code base was modified to display and perform temperature arithmetic using Fahrenheit instead of Celsius. Another addition was the introduction of the use of the DHT11 Temperature and Humidity sensor for the initial setting of the thermostat. 
 
 This was all tested using Arduino's IDE (https://www.arduino.cc/en/software) where the serial monitor was used as well as uploading the code to the ESP32 microcontroller for testing with Home Assistant. 
 
