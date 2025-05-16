@@ -23,13 +23,18 @@
 #include <Matter.h>
 #include <WiFi.h>
 
+#include <DHT.h>
+#define DHTPIN 4
+#define DHTTYPE DHT11
+DHT dht(DHTPIN, DHTTYPE);
+
 // List of Matter Endpoints for this Node
 // Matter Thermostat Endpoint
 MatterThermostat SimulatedThermostat;
 
 // WiFi is manually set and started
-const char *ssid = "";          // Change this to your WiFi SSID
-const char *password = "";  // Change this to your WiFi password
+const char *ssid = "ATT7r3Qjh3";          // Change this to your WiFi SSID
+const char *password = "9=ij5urs8cjb";  // Change this to your WiFi password
 
 // set your board USER BUTTON pin here - decommissioning button
 const uint8_t buttonPin = BOOT_PIN;  // Set your pin here. Using BOOT Button.
@@ -43,23 +48,34 @@ float CtoF (float Celsius) {
   return ((Celsius * 9.0 / 5.0) + 32.0);
 }
 
+float FtoC (float F) {
+  return ((F - 32.0) * (5.0 / 9.0));
+}
+
+float dhtTempRead() {
+  delay(2000);
+  float tempF = dht.readTemperature(true);
+  if (isnan(tempF)) {
+    dhtTempRead();
+  }
+  return tempF;
+}
+
 // Simulate a system that will activate heating/cooling in addition to a temperature sensor - add your preferred code here
 float getSimulatedTemperature(bool isHeating, bool isCooling) {
   // read sensor temperature and apply heating/cooling
-  float simulatedTempHWSensor = SimulatedThermostat.getLocalTemperature();
-  //Serial.printf("This is simulatedTempHWSensor in Celsius: %.01fC\r\n", SimulatedThermostat.getLocalTemperature());
-  Serial.printf("This is simulatedTempHWSensor in Fahrenheit: %.01fF\r\n", SimulatedThermostat.getLocalTemperature());
+  float simulatedTemp = SimulatedThermostat.getLocalTemperature();
 
   if (isHeating) {
     // it will increase to simulate a heating system
-    simulatedTempHWSensor = simulatedTempHWSensor + 0.5;
+    simulatedTemp = simulatedTemp + 1.5;
   }
   if (isCooling) {
     // it will decrease to simulate a colling system
-    simulatedTempHWSensor = simulatedTempHWSensor - 0.5;
+    simulatedTemp = simulatedTemp - 1.5;
   }
   // otherwise, it will keep the temperature stable
-  return simulatedTempHWSensor;
+  return simulatedTemp;
 }
 
 void setup() {
@@ -84,6 +100,8 @@ void setup() {
   // Matter beginning - Last step, after all EndPoints are initialized
   Matter.begin();
 
+  dht.begin();
+
   // Check Matter Accessory Commissioning state, which may change during execution of loop()
   if (!Matter.isDeviceCommissioned()) {
     Serial.println("");
@@ -105,28 +123,22 @@ void setup() {
     // after commissioning, set initial thermostat parameters
     // start the thermostat in AUTO mode
     SimulatedThermostat.setMode(MatterThermostat::THERMOSTAT_MODE_AUTO);
-    // cooling setpoint must be lower than heating setpoint by at least 2.5C or 36.5F (deadband), in auto mode
+    // cooling setpoint must be lower than heating setpoint by at least 2.5C (deadband), in auto mode
     SimulatedThermostat.setCoolingHeatingSetpoints(CtoF(20.0), CtoF(23.00));  // the target cooler and heating setpoint
-    // set the local temperature sensor in Fahrenheit (12.5C -> 54.5)
-    SimulatedThermostat.setLocalTemperature(CtoF(12.50));
+    // set the local temperature sensor in Celsius
+    SimulatedThermostat.setLocalTemperature(FtoC(dhtTempRead()));
 
     Serial.println();
     Serial.printf(
-      "Initial Setpoints are %.01fC to %.01fC with a minimum 2.5C difference\r\n", SimulatedThermostat.getHeatingSetpoint(),
-      SimulatedThermostat.getCoolingSetpoint()
-    );
-    Serial.printf(
-      "Initial Setpoints are %.01fF to %.01fF with a minimum 36.5F difference\r\n",
-      CtoF(SimulatedThermostat.getHeatingSetpoint()),
+      "Initial Setpoints are %.01fF to %.01fF with a minimum 36.5F difference\r\n", CtoF(SimulatedThermostat.getHeatingSetpoint()),
       CtoF(SimulatedThermostat.getCoolingSetpoint())
     );
-
-    Serial.printf("Auto mode is ON. Initial Temperature of %.01fC \r\n", SimulatedThermostat.getLocalTemperature());
     Serial.printf("Auto mode is ON. Initial Temperature of %.01fF \r\n", CtoF(SimulatedThermostat.getLocalTemperature()));
     Serial.println("Local Temperature Sensor will be simulated every 10 seconds and changed by a simulated heater and cooler to move in between setpoints.");
   }
 }
 
+/*
 // This will simulate the thermostat control system (heating and cooling)
 // User can set a local temperature using the Serial input (type a number and press Enter)
 // New temperature can be an positive or negative temperature in Celsius, between -50C and 50C
@@ -139,16 +151,14 @@ void readSerialForNewTemperature() {
     if (c == '\n' || c == '\r') {
       if (newTemperatureStr.length() > 0) {
         // convert the string to a float value
-        float newTemperatureF = newTemperatureStr.toFloat();
+        float newTemperature = newTemperatureStr.toFloat();
         // check if the new temperature is valid
-        if (newTemperatureF >= -58.0 && newTemperatureF <= 122.0) {
+        if (newTemperature >= -50.0 && newTemperature <= 50.0) {
           // set the new temperature
-          float newTempC = ((newTemperatureF - 32.0) * (5.0 / 9.0));
-          Serial.printf("This is newTempC: %0.1fC \r\n", newTempC);
-          SimulatedThermostat.setLocalTemperature(newTempC);
-          Serial.printf("New Temperature is %.01fF (%.01fC) \r\n", newTemperatureF, newTempC);
+          SimulatedThermostat.setLocalTemperature(newTemperature);
+          Serial.printf("New Temperature is %.01fC\r\n", newTemperature);
         } else {
-          Serial.println("Invalid Temperature value. Please type a number between -58F (-50C) and 122F (50C)");
+          Serial.println("Invalid Temperature value. Please type a number between -50 and 50");
         }
         newTemperatureStr = "";
       }
@@ -156,12 +166,13 @@ void readSerialForNewTemperature() {
       if (c == '+' || c == '-' || (c >= '0' && c <= '9') || c == '.') {
         newTemperatureStr += c;
       } else {
-        Serial.println("Invalid character. Please type a number between -58 and 122");
+        Serial.println("Invalid character. Please type a number between -50 and 50");
         newTemperatureStr = "";
       }
     }
   }
 }
+*/
 
 // loop will simulate the thermostat control system
 // User can set a local temperature using the Serial input (type a number and press Enter)
@@ -175,23 +186,25 @@ void loop() {
   static bool isCooling = false;
 
   // check if a new temperature is typed in the Serial Monitor
-  readSerialForNewTemperature();
+  //readSerialForNewTemperature();
 
   // simulate thermostat with heating/cooling system and the associated local temperature change, every 10s
   if (!(timeCounter++ % 20)) {  // delaying for 500ms x 20 = 10s
-    float localTemperature = getSimulatedTemperature(isHeating, isCooling);
+    Serial.printf("This is dhtTempRead: %.01fF\r\n", dhtTempRead());
+    float localTemperature = CtoF(getSimulatedTemperature(isHeating, isCooling));
     // Print the current thermostat local temperature value
-    Serial.printf("Current Local Temperature is %0.1fF (%.01fC) \r\n", CtoF(localTemperature), localTemperature);
-    SimulatedThermostat.setLocalTemperature(localTemperature);  // publish the new temperature value
+    Serial.printf("Current Local Temperature is %.01fF\r\n", localTemperature);
+    SimulatedThermostat.setLocalTemperature(FtoC(localTemperature));  // publish the new temperature value
 
     // Simulate the thermostat control system - User has 4 modes: OFF, HEAT, COOL, AUTO
     switch (SimulatedThermostat.getMode()) {
-      case MatterThermostat::THERMOSTAT_MODE_OFF:
+      case MatterThermostat::THERMOSTAT_MODE_OFF: {
         // turn off the heating and cooling systems
         isHeating = false;
         isCooling = false;
         break;
-      case MatterThermostat::THERMOSTAT_MODE_AUTO:
+      }
+      case MatterThermostat::THERMOSTAT_MODE_AUTO: {
         // User APP has set the thermostat to AUTO mode -- keeping the tempeature between both setpoints
         // check if the heating system should be turned on or off
         if (localTemperature < SimulatedThermostat.getHeatingSetpoint() + SimulatedThermostat.getDeadBand()) {
@@ -205,7 +218,8 @@ void loop() {
           isCooling = true;
         }
         break;
-      case MatterThermostat::THERMOSTAT_MODE_HEAT:
+      }
+      case MatterThermostat::THERMOSTAT_MODE_HEAT: {
         // Simulate the heating system - User has turned the heating system ON
         isHeating = true;
         isCooling = false;  // keep the cooling system off as it is in heating mode
@@ -215,7 +229,8 @@ void loop() {
           isHeating = false;
         }
         break;
-      case MatterThermostat::THERMOSTAT_MODE_COOL:
+      }
+      case MatterThermostat::THERMOSTAT_MODE_COOL: {
         // Simulate the cooling system - User has turned the cooling system ON
         if (SimulatedThermostat.getMode() == MatterThermostat::THERMOSTAT_MODE_COOL) {
           isCooling = true;
@@ -227,6 +242,7 @@ void loop() {
           }
         }
         break;
+      }
       default: log_e("Invalid Thermostat Mode %d", SimulatedThermostat.getMode());
     }
     // Reporting Heating and Cooling status
@@ -249,7 +265,7 @@ void loop() {
   // Onboard User Button is kept pressed for longer than 5 seconds in order to decommission matter node
   uint32_t time_diff = millis() - button_time_stamp;
   if (button_state && time_diff > decommissioningTimeout) {
-    Serial.println("Decommissioning the Light Matter Accessory. It shall be commissioned again.");
+    Serial.println("Decommissioning Thermostat Matter Accessory. It shall be commissioned again.");
     Matter.decommission();
     button_time_stamp = millis();  // avoid running decommissining again, reboot takes a second or so
   }
