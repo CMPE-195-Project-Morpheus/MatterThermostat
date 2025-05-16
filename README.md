@@ -29,4 +29,7 @@ Both of these libraries are necessary for the use of the DHT sensor within the c
 
 The board might require additional drivers like the Silicon Labs CP210x USB to UART Bridge VCP Drivers (https://www.silabs.com/developer-tools/usb-to-uart-bridge-vcp-drivers). 
 After these drivers are installed, then we change the board to one connected to the COM port and change the board type to "ESP32 Dev Module". Within the Tools section, we tweak the settings of the board to accommodate the large size of the application
+
 ![Board Settings](https://github.com/user-attachments/assets/701093bc-6e3b-4b0d-8492-a9d5ec403de8)
+
+Here, we changed the Partition Scheme of the board to be "Large APP (3MB No OTA/1MB SPIFFS)" to accommodate for the application size. 
