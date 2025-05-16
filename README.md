@@ -32,4 +32,4 @@ After these drivers are installed, then we change the board to one connected to 
 
 ![Board Settings](https://github.com/user-attachments/assets/701093bc-6e3b-4b0d-8492-a9d5ec403de8)
 
-Here, we changed the Partition Scheme of the board to be "Large APP (3MB No OTA/1MB SPIFFS)" to accommodate for the application size. 
+Here, we changed the Partition Scheme of the board to be "Large APP (3MB No OTA/1MB SPIFFS)" to accommodate for the application size. After copying the code and intializing the "ssid" and "password" variables for the desired network, we go ahead and upload the code to the ESP32. From there, we enable the Serial Monitor to view any debugging and print to serials by the code. 
