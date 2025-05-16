@@ -19,7 +19,6 @@ Tools > Boards > Board Manager and then search for the esp32 package by Espressi
 ![esp32 by espressif systems in Board Manager](https://github.com/user-attachments/assets/87579891-ec9b-434d-a872-9ec4266c34a5)
 
 
-
 This gives you the ability to use ESP32 variant boards within the IDE. For using the DHT11 Sensor, additional libraries are required. This can be amended by navigating to 
 Sketch > Include Library > Manage Library and searching for "DHT sensor library" by Adafruit as well installing the dependency "Adafruit Unified Sensor" also by Adafruit. 
 
@@ -28,3 +27,6 @@ Sketch > Include Library > Manage Library and searching for "DHT sensor library"
 
 Both of these libraries are necessary for the use of the DHT sensor within the code base. 
 
+The board might require additional drivers like the Silicon Labs CP210x USB to UART Bridge VCP Drivers (https://www.silabs.com/developer-tools/usb-to-uart-bridge-vcp-drivers). 
+After these drivers are installed, then we change the board to one connected to the COM port and change the board type to "ESP32 Dev Module". Within the Tools section, we tweak the settings of the board to accommodate the large size of the application
+![Board Settings](https://github.com/user-attachments/assets/701093bc-6e3b-4b0d-8492-a9d5ec403de8)
